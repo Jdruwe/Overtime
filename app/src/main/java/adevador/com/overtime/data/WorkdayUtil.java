@@ -55,7 +55,8 @@ public class WorkdayUtil {
 
         return realm.where(Workday.class)
                 .between("date", begin, end)
-                .findAll();
+                .findAll()
+                .sort("date");
     }
 
     public static Workday get(Context context, Date date) {

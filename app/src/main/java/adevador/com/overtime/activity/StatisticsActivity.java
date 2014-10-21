@@ -68,6 +68,7 @@ public class StatisticsActivity extends ActionBarActivity implements DateListene
 
         chart.setDescription("October - 2014");
         chart.setData(new LineData(xVals, lineDataSet));
+        chart.setDrawGridBackground(false);
 
     }
 
