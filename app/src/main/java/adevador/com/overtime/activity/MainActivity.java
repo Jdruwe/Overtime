@@ -1,18 +1,15 @@
 package adevador.com.overtime.activity;
 
+import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
-
-import com.roomorama.caldroid.CaldroidFragment;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 import adevador.com.overtime.R;
@@ -52,6 +49,8 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
 
         switch (id) {
             case R.id.action_settings:
+                Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 return true;
         }
 
@@ -86,7 +85,7 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
 
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             if (fragment instanceof CalendarFragment) {
-                ((CalendarFragment) fragment).workdaysUpdated();
+                ((CalendarFragment) fragment).displayData();
                 break;
             }
         }

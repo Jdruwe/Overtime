@@ -1,8 +1,9 @@
 package adevador.com.overtime.fragment;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -10,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.joanzapata.android.iconify.Iconify;
 import com.roomorama.caldroid.CaldroidFragment;
@@ -18,10 +18,12 @@ import com.roomorama.caldroid.CaldroidListener;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 
 import adevador.com.overtime.R;
+import adevador.com.overtime.activity.SettingsActivity;
 import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
@@ -73,6 +75,7 @@ public class CalendarFragment extends CaldroidFragment {
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
         processUI(view);
         setListeners();
+        displayData();
         return view;
 
     }
@@ -148,10 +151,20 @@ public class CalendarFragment extends CaldroidFragment {
         caldroidFragment.refreshView();
     }
 
-    public void workdaysUpdated() {
+    public void displayData() {
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Long milliseconds = sharedPref.getLong(SettingsActivity.KEY_PREF_HOURS_DAY, 25200000);
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(milliseconds);
+
+        int hours = calendar.get(Calendar.HOUR);
+        int minutes = calendar.get(Calendar.MINUTE);
+
         RealmResults<Workday> workdays = WorkdayUtil.getAll(getActivity());
         for (Workday workday : workdays) {
-            if (workday.getHours() > 8) {
+            if (workday.getHours() > hours || (workday.getHours() == hours && workday.getMinutes() > minutes)) {
                 caldroidFragment.setBackgroundResourceForDate(R.color.orange, workday.getDate());
             } else {
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, workday.getDate());
@@ -175,5 +188,4 @@ public class CalendarFragment extends CaldroidFragment {
         super.onDetach();
         mListener = null;
     }
-
 }

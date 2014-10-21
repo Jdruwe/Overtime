@@ -1,0 +1,12 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="YOUR INFORMATION">
+        <adevador.com.overtime.preference.TimePreference
+            android:defaultValue="25200000"
+            android:key="hours_day_key"
+            android:title="Hours/day" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
+
