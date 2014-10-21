@@ -8,4 +8,5 @@ import java.util.Date;
  */
 public interface TimeListener {
     public void timeWorked(ArrayList<Date> dates, int hours, int minutes);
+    public void deleteWorkday(Date date);
 }

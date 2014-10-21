@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.activity.SettingsActivity;
@@ -36,6 +37,7 @@ public class CalendarFragment extends CaldroidFragment {
     private CaldroidFragment caldroidFragment;
     private Set<Date> multiSelection;
     private boolean inMultiSelection;
+    private Set<Date> workdays;
 
     public static CalendarFragment newInstance() {
         return new CalendarFragment();
@@ -103,21 +105,33 @@ public class CalendarFragment extends CaldroidFragment {
 
             @Override
             public void onSelectDate(Date date, View view) {
-                if (inMultiSelection) {
-                    multiDateSelected(date);
+                if (!checkIfWorkdayExists(date)) {
+                    if (inMultiSelection) {
+                        multiDateSelected(date);
+                    } else {
+                        mListener.dateSelected(date);
+                    }
                 } else {
-                    mListener.dateSelected(date);
+                    mListener.workdayClicked(date);
                 }
             }
 
             @Override
             public void onLongClickDate(Date date, View view) {
-                enableMultiSelection();
-                multiDateSelected(date);
+                if (!checkIfWorkdayExists(date)) {
+                    enableMultiSelection();
+                    multiDateSelected(date);
+                } else {
+                    mListener.workdayClicked(date);
+                }
             }
         };
-
         caldroidFragment.setCaldroidListener(listener);
+    }
+
+
+    private boolean checkIfWorkdayExists(Date date) {
+        return workdays != null && !workdays.isEmpty() && workdays.contains(date);
     }
 
 
@@ -151,6 +165,10 @@ public class CalendarFragment extends CaldroidFragment {
         caldroidFragment.refreshView();
     }
 
+    public void resetWorkdayBackground(Date date){
+        caldroidFragment.setBackgroundResourceForDate(R.color.white, date);
+    }
+
     public void displayData() {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -162,13 +180,16 @@ public class CalendarFragment extends CaldroidFragment {
         int hours = calendar.get(Calendar.HOUR);
         int minutes = calendar.get(Calendar.MINUTE);
 
-        RealmResults<Workday> workdays = WorkdayUtil.getAll(getActivity());
-        for (Workday workday : workdays) {
+        workdays = new TreeSet<Date>();
+
+        RealmResults<Workday> results = WorkdayUtil.getAll(getActivity());
+        for (Workday workday : results) {
             if (workday.getHours() > hours || (workday.getHours() == hours && workday.getMinutes() > minutes)) {
                 caldroidFragment.setBackgroundResourceForDate(R.color.orange, workday.getDate());
             } else {
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, workday.getDate());
             }
+            workdays.add(workday.getDate());
         }
         caldroidFragment.refreshView();
     }

@@ -14,10 +14,12 @@ import java.util.Set;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.data.WorkdayUtil;
+import adevador.com.overtime.dialog.DeleteDialog;
 import adevador.com.overtime.dialog.WorkDialog;
 import adevador.com.overtime.fragment.CalendarFragment;
 import adevador.com.overtime.listener.CalendarListener;
 import adevador.com.overtime.listener.TimeListener;
+import adevador.com.overtime.model.Workday;
 
 
 public class MainActivity extends ActionBarActivity implements CalendarListener, TimeListener {
@@ -71,6 +73,12 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
         openTimeDialog(dateList);
     }
 
+    @Override
+    public void workdayClicked(Date date) {
+        Workday workday = WorkdayUtil.get(this, date);
+        openDeleteDialog(workday.getDate());
+    }
+
     private void openTimeDialog(ArrayList<Date> date) {
         DialogFragment workDialog = new WorkDialog();
         Bundle bundle = new Bundle();
@@ -79,12 +87,33 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
         workDialog.show(getSupportFragmentManager(), "hours");
     }
 
+    private void openDeleteDialog(Date date) {
+        DialogFragment deleteDialog = new DeleteDialog();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("date", date);
+        deleteDialog.setArguments(bundle);
+        deleteDialog.show(getSupportFragmentManager(), "delete");
+    }
+
+
     @Override
     public void timeWorked(ArrayList<Date> dates, int hours, int minutes) {
         WorkdayUtil.save(this, dates, hours, minutes);
+        refreshCalendar(null);
+    }
 
+    @Override
+    public void deleteWorkday(Date date) {
+        WorkdayUtil.delete(this, date);
+        refreshCalendar(date);
+    }
+
+    private void refreshCalendar(Date date) {
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             if (fragment instanceof CalendarFragment) {
+                if (date != null) {
+                    ((CalendarFragment) fragment).resetWorkdayBackground(date);
+                }
                 ((CalendarFragment) fragment).displayData();
                 break;
             }

@@ -9,4 +9,5 @@ import java.util.Set;
 public interface CalendarListener {
     public void dateSelected(Date date);
     public void datesSelected(Set<Date> dates);
+    public void workdayClicked(Date date);
 }
