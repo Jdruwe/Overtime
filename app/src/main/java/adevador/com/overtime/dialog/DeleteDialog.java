@@ -30,7 +30,7 @@ public class DeleteDialog extends DialogFragment {
 
         final Date date = (Date) getArguments().getSerializable("date");
 
-        builder.setTitle(getString(R.id.delete_information));
+        builder.setTitle(getString(R.string.delete_confirmation));
         builder.setMessage(R.string.delete_confirmation)
                 // Add action buttons
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {

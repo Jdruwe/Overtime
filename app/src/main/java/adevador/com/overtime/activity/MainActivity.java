@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.joanzapata.android.iconify.Iconify;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
@@ -17,6 +19,7 @@ import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.dialog.DeleteDialog;
 import adevador.com.overtime.dialog.WorkDialog;
 import adevador.com.overtime.fragment.CalendarFragment;
+import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
 import adevador.com.overtime.listener.TimeListener;
 import adevador.com.overtime.model.Workday;
@@ -42,6 +45,7 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.action_statistics).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_bar_chart_o, R.color.white, 24, this));
         return true;
     }
 
@@ -53,6 +57,10 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(settingsIntent);
+                return true;
+            case R.id.action_statistics:
+                Intent statisticsIntent = new Intent(MainActivity.this, StatisticsActivity.class);
+                startActivity(statisticsIntent);
                 return true;
         }
 

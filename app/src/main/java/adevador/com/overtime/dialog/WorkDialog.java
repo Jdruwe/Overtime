@@ -54,7 +54,7 @@ public class WorkDialog extends DialogFragment {
 
         final ArrayList<Date> dates = (ArrayList<Date>) getArguments().getSerializable("dates");
 
-        builder.setTitle(getString(R.id.hours_worked));
+        builder.setTitle(getString(R.string.hours_worked));
         builder.setView(view)
                 // Add action buttons
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
