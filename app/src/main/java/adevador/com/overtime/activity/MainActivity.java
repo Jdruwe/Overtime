@@ -5,6 +5,10 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import java.util.Date;
+import java.util.List;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.fragment.CalendarFragment;
@@ -46,4 +50,14 @@ public class MainActivity extends ActionBarActivity implements CalendarListener 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void dateSelected(Date date) {
+        Toast.makeText(this, "In activity" + date.toString(),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void datesSelected(List<Date> dates) {
+
+    }
 }

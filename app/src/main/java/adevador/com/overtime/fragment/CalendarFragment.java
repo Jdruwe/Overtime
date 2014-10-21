@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.joanzapata.android.iconify.Iconify;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
@@ -17,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import adevador.com.overtime.R;
+import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
 
 public class CalendarFragment extends CaldroidFragment {
@@ -32,6 +36,13 @@ public class CalendarFragment extends CaldroidFragment {
 
     public CalendarFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.multi_selection, menu);
+        menu.findItem(R.id.action_multi).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_clock_o, R.color.white, 24, getActivity()));
     }
 
     @Override
@@ -83,14 +94,13 @@ public class CalendarFragment extends CaldroidFragment {
                 if (inMultiSelection) {
                     multiDateSelected(date);
                 } else {
-                    Toast.makeText(getActivity(), date.toString(),
-                            Toast.LENGTH_SHORT).show();
+                    mListener.dateSelected(date);
                 }
             }
 
             @Override
             public void onLongClickDate(Date date, View view) {
-                inMultiSelection = true;
+                enableMultiSelection();
                 multiDateSelected(date);
             }
         };
@@ -104,12 +114,22 @@ public class CalendarFragment extends CaldroidFragment {
             multiSelection.remove(date);
             caldroidFragment.setBackgroundResourceForDate(R.color.caldroid_white, date);
             if (multiSelection.isEmpty()) {
-                inMultiSelection = false;
+                disableMultiSelection();
             }
         } else {
             multiSelection.add(date);
         }
         displayMultiSelection();
+    }
+
+    private void enableMultiSelection(){
+        setHasOptionsMenu(true);
+        inMultiSelection = true;
+    }
+
+    private void disableMultiSelection(){
+        setHasOptionsMenu(false);
+        inMultiSelection = false;
     }
 
     private void displayMultiSelection() {
