@@ -19,11 +19,14 @@ import com.roomorama.caldroid.CaldroidListener;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import adevador.com.overtime.R;
+import adevador.com.overtime.activity.MainActivity;
 import adevador.com.overtime.activity.SettingsActivity;
 import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.generator.IconGenerator;
@@ -87,7 +90,7 @@ public class CalendarFragment extends CaldroidFragment {
     }
 
     private void addCalendar() {
-        caldroidFragment = new CaldroidFragment();
+        caldroidFragment = new CaldroidOvertimeFragment();
         Bundle args = new Bundle();
         Calendar cal = Calendar.getInstance();
         args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
@@ -165,7 +168,7 @@ public class CalendarFragment extends CaldroidFragment {
         caldroidFragment.refreshView();
     }
 
-    public void resetWorkdayBackground(Date date){
+    public void resetWorkdayBackground(Date date) {
         caldroidFragment.setBackgroundResourceForDate(R.color.white, date);
     }
 
@@ -182,6 +185,8 @@ public class CalendarFragment extends CaldroidFragment {
 
         workdays = new TreeSet<Date>();
 
+        Map<Date, Workday> extraData = new HashMap<Date, Workday>();
+
         RealmResults<Workday> results = WorkdayUtil.getAll(getActivity());
         for (Workday workday : results) {
             if (workday.getHours() > hours || (workday.getHours() == hours && workday.getMinutes() > minutes)) {
@@ -190,8 +195,15 @@ public class CalendarFragment extends CaldroidFragment {
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, workday.getDate());
             }
             workdays.add(workday.getDate());
+            extraData.put(workday.getDate(), workday);
         }
+        sendDisplayData(extraData);
         caldroidFragment.refreshView();
+    }
+
+    private void sendDisplayData(Map<Date, Workday> extra) {
+        HashMap<String, Object> extraData = caldroidFragment.getExtraData();
+        extraData.put("extra", extra);
     }
 
     @Override
