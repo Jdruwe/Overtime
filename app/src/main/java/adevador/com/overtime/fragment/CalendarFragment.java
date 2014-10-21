@@ -1,11 +1,13 @@
 package adevador.com.overtime.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -20,8 +22,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import adevador.com.overtime.R;
+import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
+import adevador.com.overtime.model.Workday;
+import io.realm.RealmResults;
 
 public class CalendarFragment extends CaldroidFragment {
 
@@ -45,21 +50,26 @@ public class CalendarFragment extends CaldroidFragment {
         menu.findItem(R.id.action_multi).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_clock_o, R.color.white, 24, getActivity()));
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_multi:
+                mListener.datesSelected(multiSelection);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-
         multiSelection = new HashSet<Date>();
         inMultiSelection = false;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
         processUI(view);
         setListeners();
@@ -69,7 +79,6 @@ public class CalendarFragment extends CaldroidFragment {
 
     private void processUI(View view) {
         addCalendar();
-
     }
 
     private void addCalendar() {
@@ -122,12 +131,12 @@ public class CalendarFragment extends CaldroidFragment {
         displayMultiSelection();
     }
 
-    private void enableMultiSelection(){
+    private void enableMultiSelection() {
         setHasOptionsMenu(true);
         inMultiSelection = true;
     }
 
-    private void disableMultiSelection(){
+    private void disableMultiSelection() {
         setHasOptionsMenu(false);
         inMultiSelection = false;
     }
@@ -135,6 +144,18 @@ public class CalendarFragment extends CaldroidFragment {
     private void displayMultiSelection() {
         for (Date date : multiSelection) {
             caldroidFragment.setBackgroundResourceForDate(R.color.caldroid_holo_blue_light, date);
+        }
+        caldroidFragment.refreshView();
+    }
+
+    public void workdaysUpdated() {
+        RealmResults<Workday> workdays = WorkdayUtil.getAll(getActivity());
+        for (Workday workday : workdays) {
+            if (workday.getHours() > 8) {
+                caldroidFragment.setBackgroundResourceForDate(R.color.orange, workday.getDate());
+            } else {
+                caldroidFragment.setBackgroundResourceForDate(R.color.green, workday.getDate());
+            }
         }
         caldroidFragment.refreshView();
     }
