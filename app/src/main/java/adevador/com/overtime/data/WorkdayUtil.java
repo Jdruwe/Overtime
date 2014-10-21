@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentActivity;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +38,23 @@ public class WorkdayUtil {
     public static RealmResults<Workday> getAll(Context context) {
         Realm realm = getRealm(context);
         return realm.where(Workday.class)
+                .findAll();
+    }
+
+    public static RealmResults<Workday> getAll(Context context, int year, int month) {
+        Realm realm = getRealm(context);
+
+        Calendar c = Calendar.getInstance();
+        c.set(year, month, 0, 0, 0);
+        Date begin = c.getTime();
+
+        ++month;
+
+        c.set(year, month, 1, 0, 0);
+        Date end = c.getTime();
+
+        return realm.where(Workday.class)
+                .between("date", begin, end)
                 .findAll();
     }
 
