@@ -8,5 +8,12 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="APP">
+        <Preference
+            android:key="about_key"
+            android:title="About" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
 
