@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.joanzapata.android.iconify.Iconify;
 
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,7 +74,8 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         lineDataSet.setCircleSize(7);
         lineDataSet.setColors(new int[]{R.color.orange}, this);
 
-        chart.setDescription("October - 2014");
+        String monthString = new DateFormatSymbols().getMonths()[month];
+        chart.setDescription(monthString + "- " + year);
         chart.setData(new LineData(xVals, lineDataSet));
         chart.setDrawGridBackground(false);
         chart.invalidate();
