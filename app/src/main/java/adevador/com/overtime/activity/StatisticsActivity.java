@@ -7,9 +7,12 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.DatePicker;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -21,6 +24,7 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.data.WorkdayUtil;
@@ -32,6 +36,9 @@ import io.realm.RealmResults;
 public class StatisticsActivity extends ActionBarActivity implements DatePickerDialog.OnDateSetListener {
 
     private LineChart chart;
+    private TextView infoLabel;
+    private TextView result;
+    private TextView overtime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,17 +50,21 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
 
     private void processUI() {
         chart = (LineChart) findViewById(R.id.chart);
+        infoLabel = (TextView) findViewById(R.id.info_label);
+        result = (TextView) findViewById(R.id.result);
+        overtime = (TextView) findViewById(R.id.overtime);
 
         Calendar cal = Calendar.getInstance();
-
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         int year = sharedPref.getInt(SettingsActivity.KEY_PREF_YEAR, cal.get(cal.YEAR));
         int month = sharedPref.getInt(SettingsActivity.KEY_PREF_MONTH, cal.get(cal.MONTH));
 
         displayData(year, month);
+
     }
 
     private void displayData(int year, int month) {
+        overtime.setVisibility(View.VISIBLE);
         RealmResults<Workday> workdays = getDataForPeriod(year, month);
 
         ArrayList<String> xVals = new ArrayList<String>();
@@ -61,10 +72,55 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd");
 
+        int hoursWorked = 0;
+        int minutesWorked = 0;
+
         for (int i = 0; i < workdays.size(); i++) {
+            hoursWorked += workdays.get(i).getHours();
+            minutesWorked += workdays.get(i).getMinutes();
             xVals.add(simpleDateFormat.format(workdays.get(i).getDate()));
             String value = workdays.get(i).getHours() + "." + workdays.get(i).getMinutes();
             yVals.add(new Entry(Float.parseFloat(value), i));
+        }
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        Long milliseconds = sharedPref.getLong(SettingsActivity.KEY_PREF_HOURS_DAY, 25200000);
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(milliseconds);
+
+
+        if (!workdays.isEmpty()) {
+            int hoursLeft = minutesWorked / 60;
+            int minutesLeft = minutesWorked % 60;
+            hoursWorked += hoursLeft;
+
+            String res = "You've worked <b>" + hoursWorked + "h " + minutesLeft + "m </b> over <b>" + workdays.size() + "</b> days";
+            result.setText(Html.fromHtml(res));
+
+            //Calculate difference to determine if overtime has happened in the current month
+            int settingHours = calendar.get(Calendar.HOUR) * workdays.size();
+            int settingMinutes = calendar.get(Calendar.MINUTE) * workdays.size();
+
+            settingMinutes += (settingHours * 60);
+            minutesWorked += (hoursWorked * 60);
+
+            int difference = minutesWorked - settingMinutes;
+            if (difference > 0) {
+                int hours = difference / 60;
+                int minutes = difference % 60;
+                overtime.setText(Html.fromHtml(String.format("Overtime: <b>%dh %dm<b>", hours, minutes)));
+            } else if (difference < 0) {
+                int abs = Math.abs(difference);
+                int hours = abs / 60;
+                int minutes = abs % 60;
+                overtime.setText(Html.fromHtml(String.format("Short time: <b>%dh %dm<b>", hours, minutes)));
+            } else {
+                overtime.setVisibility(View.GONE);
+            }
+        } else {
+            result.setText(getString(R.string.no_date_found));
+            overtime.setVisibility(View.GONE);
         }
 
         LineDataSet lineDataSet = new LineDataSet(yVals, "Working");
@@ -76,6 +132,7 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
 
         String monthString = new DateFormatSymbols().getMonths()[month];
         chart.setDescription(monthString + "- " + year);
+        infoLabel.setText(monthString + "- " + year);
         chart.setData(new LineData(xVals, lineDataSet));
         chart.setDrawGridBackground(false);
         chart.invalidate();

@@ -19,5 +19,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="delete_confirmation">Are you sure you want to remove the information?</string>
     <string name="title_activity_statistics">StatisticsActivity</string>
+    <string name="no_date_found">No data found for this month</string>
 
 </resources>
