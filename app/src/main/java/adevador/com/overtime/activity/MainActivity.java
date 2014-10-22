@@ -1,5 +1,6 @@
 package adevador.com.overtime.activity;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 
 import com.joanzapata.android.iconify.Iconify;
 
@@ -45,7 +47,7 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        menu.findItem(R.id.action_statistics).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_bar_chart_o, R.color.white, 24, this));
+        menu.findItem(R.id.action_statistics).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_bar_chart_o, R.color.dark_gray, 24, this));
         return true;
     }
 

@@ -54,7 +54,7 @@ public class CalendarFragment extends CaldroidFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.multi_selection, menu);
-        menu.findItem(R.id.action_multi).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_clock_o, R.color.white, 24, getActivity()));
+        menu.findItem(R.id.action_multi).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_clock_o, R.color.dark_gray, 24, getActivity()));
     }
 
 

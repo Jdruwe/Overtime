@@ -1,38 +1,34 @@
 package adevador.com.overtime.activity;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.joanzapata.android.iconify.Iconify;
-import com.roomorama.caldroid.CaldroidFragment;
 
-import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.dialog.DateDialog;
-import adevador.com.overtime.dialog.WorkDialog;
 import adevador.com.overtime.generator.IconGenerator;
-import adevador.com.overtime.listener.DateListener;
 import adevador.com.overtime.model.Workday;
 import io.realm.RealmResults;
 
-public class StatisticsActivity extends ActionBarActivity implements DateListener {
+public class StatisticsActivity extends ActionBarActivity implements DatePickerDialog.OnDateSetListener {
 
     private LineChart chart;
 
@@ -46,7 +42,18 @@ public class StatisticsActivity extends ActionBarActivity implements DateListene
 
     private void processUI() {
         chart = (LineChart) findViewById(R.id.chart);
-        RealmResults<Workday> workdays = getDataForPeriod(2014, 9);
+
+        Calendar cal = Calendar.getInstance();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        int year = sharedPref.getInt(SettingsActivity.KEY_PREF_YEAR, cal.get(cal.YEAR));
+        int month = sharedPref.getInt(SettingsActivity.KEY_PREF_MONTH, cal.get(cal.MONTH));
+
+        displayData(year, month);
+    }
+
+    private void displayData(int year, int month) {
+        RealmResults<Workday> workdays = getDataForPeriod(year, month);
 
         ArrayList<String> xVals = new ArrayList<String>();
         ArrayList<Entry> yVals = new ArrayList<Entry>();
@@ -69,7 +76,7 @@ public class StatisticsActivity extends ActionBarActivity implements DateListene
         chart.setDescription("October - 2014");
         chart.setData(new LineData(xVals, lineDataSet));
         chart.setDrawGridBackground(false);
-
+        chart.invalidate();
     }
 
     private void showUpNavigation() {
@@ -81,7 +88,7 @@ public class StatisticsActivity extends ActionBarActivity implements DateListene
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.statistics, menu);
-        menu.findItem(R.id.action_date).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_calendar, R.color.white, 24, this));
+        menu.findItem(R.id.action_date).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_calendar, R.color.dark_gray, 24, this));
         return true;
     }
 
@@ -101,18 +108,30 @@ public class StatisticsActivity extends ActionBarActivity implements DateListene
     }
 
     private void openDatePickerDialog() {
-        DialogFragment dateDialog = new DateDialog();
-        Bundle bundle = new Bundle();
+
         Calendar cal = Calendar.getInstance();
-        bundle.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
-        bundle.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
-        dateDialog.setArguments(bundle);
-        dateDialog.show(getSupportFragmentManager(), "date");
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        int year = sharedPref.getInt(SettingsActivity.KEY_PREF_YEAR, cal.get(cal.YEAR));
+        int month = sharedPref.getInt(SettingsActivity.KEY_PREF_MONTH, cal.get(cal.MONTH) + 1);
+
+        Bundle b = new Bundle();
+        b.putInt(DateDialog.YEAR, year);
+        b.putInt(DateDialog.MONTH, month);
+        b.putInt(DateDialog.DATE, 1);
+        DialogFragment picker = new DateDialog();
+        picker.setArguments(b);
+        picker.show(getSupportFragmentManager(), "frag_date_picker");
     }
 
     @Override
-    public void dateSelected(int year, int month) {
-
+    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt(SettingsActivity.KEY_PREF_YEAR, year);
+        editor.putInt(SettingsActivity.KEY_PREF_MONTH, month);
+        editor.apply();
+        displayData(year, month);
     }
 
     private RealmResults<Workday> getDataForPeriod(int year, int month) {

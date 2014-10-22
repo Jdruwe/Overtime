@@ -10,9 +10,11 @@ import adevador.com.overtime.fragment.SettingsFragment;
 /**
  * Created by druweje on 1/10/2014.
  */
-public class SettingsActivity extends Activity{
+public class SettingsActivity extends Activity {
 
     public static final String KEY_PREF_HOURS_DAY = "hours_day_key";
+    public static final String KEY_PREF_YEAR = "year_key";
+    public static final String KEY_PREF_MONTH = "month_key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
