@@ -175,6 +175,8 @@ public class CalendarFragment extends CaldroidFragment {
     public void displayData() {
 
         setHasOptionsMenu(false);
+        multiSelection.clear();
+        inMultiSelection = false;
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         Long milliseconds = sharedPref.getLong(SettingsActivity.KEY_PREF_HOURS_DAY, 25200000);
