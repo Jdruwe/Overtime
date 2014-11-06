@@ -2,13 +2,11 @@ package adevador.com.overtime.export;
 
 import android.content.Context;
 import android.util.JsonReader;
-import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,8 +21,6 @@ public class JSONImport {
 
 
     public static boolean importJSON(Context context, String filePath) {
-        Toast.makeText(context, "In import", Toast.LENGTH_LONG).show();
-
         FileInputStream in = null;
         try {
             in = new FileInputStream(filePath);
