@@ -1,6 +1,7 @@
 package adevador.com.overtime.activity;
 
-import android.app.DatePickerDialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -8,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.DatePicker;
 
 import com.joanzapata.android.iconify.Iconify;
 
@@ -20,6 +20,7 @@ import adevador.com.overtime.R;
 import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.dialog.DeleteDialog;
 import adevador.com.overtime.dialog.WorkDialog;
+import adevador.com.overtime.export.JSONExport;
 import adevador.com.overtime.fragment.CalendarFragment;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
@@ -60,6 +61,9 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
                 Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
+            case R.id.action_export:
+                showExportOptions();
+                return true;
             case R.id.action_statistics:
                 Intent statisticsIntent = new Intent(MainActivity.this, StatisticsActivity.class);
                 startActivity(statisticsIntent);
@@ -67,6 +71,23 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showExportOptions() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.pick_export)
+                .setItems(R.array.export_options, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                //JSON export
+                                JSONExport.generateJSON(getApplicationContext());
+                                break;
+                        }
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     @Override

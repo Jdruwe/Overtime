@@ -1,7 +1,10 @@
 package adevador.com.overtime.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
@@ -11,11 +14,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.IconTextView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.joanzapata.android.iconify.Iconify;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -41,6 +48,7 @@ public class CalendarFragment extends CaldroidFragment {
     private Set<Date> multiSelection;
     private boolean inMultiSelection;
     private Set<Date> workdays;
+    private Calendar calendar;
 
     public static CalendarFragment newInstance() {
         return new CalendarFragment();
@@ -68,11 +76,14 @@ public class CalendarFragment extends CaldroidFragment {
         return super.onOptionsItemSelected(item);
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         multiSelection = new HashSet<Date>();
         inMultiSelection = false;
+        calendar = Calendar.getInstance();
+        calendar.set(2014, Calendar.JULY, 18, 0, 0, 0);
     }
 
     @Override
@@ -108,6 +119,7 @@ public class CalendarFragment extends CaldroidFragment {
 
             @Override
             public void onSelectDate(Date date, View view) {
+
                 if (!checkIfWorkdayExists(date)) {
                     if (inMultiSelection) {
                         multiDateSelected(date);
