@@ -11,8 +11,14 @@
 
     <item
         android:id="@+id/action_export"
-        android:orderInCategory="99"
+        android:orderInCategory="98"
         android:title="@string/action_export"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_import"
+        android:orderInCategory="99"
+        android:title="@string/action_import"
         app:showAsAction="never" />
 
     <item

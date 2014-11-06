@@ -71,4 +71,13 @@ public class WorkdayUtil {
         workday.remove(0);
         realm.commitTransaction();
     }
+
+    public static void deleteAll(Context context) {
+        Realm realm = getRealm(context);
+        realm.beginTransaction();
+        RealmResults<Workday> workday = realm.where(Workday.class)
+                .findAll();
+        workday.clear();
+        realm.commitTransaction();
+    }
 }
