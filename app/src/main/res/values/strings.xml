@@ -9,13 +9,14 @@
 
     <!-- Menu -->
     <string name="action_settings">Settings</string>
+    <string name="action_google_calendar">Google calendar sync</string>
     <string name="action_statistics">Statistics</string>
     <string name="action_multi">Multi</string>
     <string name="action_date">Date</string>
     <string name="action_export">Export</string>
     <string name="action_import">Import</string>
 
-    <string name="no_date_found">No data found for this month</string>
+    <string name="no_data_found">No data found for this month</string>
     <string name="about">About</string>
 
     <!--Export-->

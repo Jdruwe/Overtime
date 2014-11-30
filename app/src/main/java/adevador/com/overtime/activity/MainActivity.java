@@ -2,8 +2,13 @@ package adevador.com.overtime.activity;
 
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.net.Uri;
+import android.provider.CalendarContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -16,8 +21,11 @@ import android.widget.Toast;
 import com.joanzapata.android.iconify.Iconify;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Set;
+import java.util.TimeZone;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.data.WorkdayUtil;
@@ -30,7 +38,6 @@ import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
 import adevador.com.overtime.listener.TimeListener;
 import adevador.com.overtime.model.Workday;
-
 
 public class MainActivity extends ActionBarActivity implements CalendarListener, TimeListener {
 
