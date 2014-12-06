@@ -44,9 +44,9 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
     private static final int DONATION_REQUEST_CODE = 1000;
 
     IabHelper mHelper;
-    IabHelper.QueryInventoryFinishedListener mQueryFinishedListener;
     IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener;
     IabHelper.QueryInventoryFinishedListener mGotInventoryListener;
+    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,61 +122,55 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
 
     private void openDonateDialog() {
 
-//        mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-//
-//            @Override
-//            public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-//                if (result.isFailure()) {
-//                    Toast.makeText(getApplicationContext(), "Error purchasing", Toast.LENGTH_SHORT).show();
-//                    return;
-//                } else if (purchase.getSku().equals(SKU_DONATION)) {
-//                    // consume the gas and update the UI
-//                    Toast.makeText(getApplicationContext(), "Thank you for the donation!!!", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        };
-//
-//        mHelper.launchPurchaseFlow(this, SKU_DONATION, DONATION_REQUEST_CODE,
-//                mPurchaseFinishedListener);
+        mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
 
+            @Override
+            public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+                //This does not get used!!! ==> http://stackoverflow.com/questions/14800286/oniabpurchasefinished-never-called
+            }
+        };
+
+        mHelper.launchPurchaseFlow(this, SKU_DONATION, DONATION_REQUEST_CODE,
+                mPurchaseFinishedListener);
+    }
+
+    private void consumeInAppPurchase() {
+
+        mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() {
+            public void onConsumeFinished(Purchase purchase, IabResult result) {
+                if (result.isSuccess()) {
+                    // provision the in-app purchase to the user
+                    // (for example, credit 50 gold coins to player's character)
+                } else {
+                    // handle error
+                }
+            }
+        };
 
         mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
             public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
 
                 if (result.isFailure()) {
                     // handle error here
-                    Toast.makeText(getApplicationContext(), "Something went wrong while searching the in-app inventory.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),
+                            "Something went wrong while searching the in-app inventory.",
+                            Toast.LENGTH_LONG).show();
                 } else {
                     // does the user have the premium upgrade?
                     boolean hasDonated = inventory.hasPurchase(SKU_DONATION);
                     if (hasDonated) {
-                        Toast.makeText(getApplicationContext(), "Thank you for the donation!", Toast.LENGTH_LONG).show();
-                        consumeInAppPurchase(inventory);
+                        Toast.makeText(getApplicationContext(), "Thank you for the donation!",
+                                Toast.LENGTH_LONG).show();
+                        mHelper.consumeAsync(inventory.getPurchase(SKU_DONATION), mConsumeFinishedListener);
                     }
                 }
             }
         };
 
-        mHelper.queryInventoryAsync(mGotInventoryListener);
-
-    }
-
-    private void consumeInAppPurchase(Inventory inventory) {
-
-        IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
-                new IabHelper.OnConsumeFinishedListener() {
-                    public void onConsumeFinished(Purchase purchase, IabResult result) {
-                        if (result.isSuccess()) {
-                            // provision the in-app purchase to the user
-                            // (for example, credit 50 gold coins to player's character)
-                        }
-                        else {
-                            // handle error
-                        }
-                    }
-                };
-
-        mHelper.consumeAsync(inventory.getPurchase(SKU_DONATION), mConsumeFinishedListener);
+        if (mHelper != null) {
+            mHelper.flagEndAsync();
+            mHelper.queryInventoryAsync(mGotInventoryListener);
+        }
     }
 
     private void showExportOptions() {
@@ -246,6 +240,7 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
                 }
                 break;
             case DONATION_REQUEST_CODE:
+                consumeInAppPurchase();
                 break;
         }
     }
