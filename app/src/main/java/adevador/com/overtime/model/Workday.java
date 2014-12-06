@@ -1,5 +1,6 @@
 package adevador.com.overtime.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import io.realm.RealmObject;
@@ -7,7 +8,7 @@ import io.realm.RealmObject;
 /**
  * Created by druweje on 21/10/2014.
  */
-public class Workday extends RealmObject {
+public class Workday extends RealmObject implements Serializable{
 
     private Date date;
     private int hours;

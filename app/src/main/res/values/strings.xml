@@ -40,6 +40,7 @@
     <string name="delete_all_confirmation">Importing a file will delete all current data! Are you sure you want to continue? </string>
     <string name="title_activity_statistics">StatisticsActivity</string>
     <string name="about_text">App by Adevador (Jeroen Druwé and Dimitri De Kerf), using:\n\n - MPAndroidChart \n - Android-iconify \n - Caldroid \n - realm-android \n - App icon by Freepik, CC BY 3.0</string>
+    <string name="action_donate">Donate</string>
 
 
 </resources>

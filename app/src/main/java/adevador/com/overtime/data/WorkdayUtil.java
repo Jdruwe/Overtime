@@ -8,6 +8,7 @@ import java.util.Date;
 
 import adevador.com.overtime.model.Workday;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 /**
@@ -23,10 +24,10 @@ public class WorkdayUtil {
         Realm realm = getRealm(context);
         for (Date date : dates) {
             realm.beginTransaction();
-            Workday dog = realm.createObject(Workday.class);
-            dog.setDate(date);
-            dog.setHours(hours);
-            dog.setMinutes(minutes);
+            Workday workday = realm.createObject(Workday.class);
+            workday.setDate(date);
+            workday.setHours(hours);
+            workday.setMinutes(minutes);
             realm.commitTransaction();
         }
     }
@@ -49,10 +50,13 @@ public class WorkdayUtil {
         c.set(year, month, 1, 0, 0);
         Date end = c.getTime();
 
-        return realm.where(Workday.class)
+        RealmResults<Workday> result = realm.where(Workday.class)
                 .between("date", begin, end)
-                .findAll()
-                .sort("date");
+                .findAll();
+
+        result.sort("date");
+
+        return result;
     }
 
     public static Workday get(Context context, Date date) {
@@ -62,13 +66,17 @@ public class WorkdayUtil {
                 .findFirst();
     }
 
-    public static void delete(Context context, Date date) {
+    public static void delete(Context context, Workday workday) {
         Realm realm = getRealm(context);
         realm.beginTransaction();
-        RealmResults<Workday> workday = realm.where(Workday.class)
-                .equalTo("date", date)
-                .findAll();
-        workday.remove(0);
+
+        Workday workday1 = realm.where(Workday.class)
+                .equalTo("date", workday.getDate())
+                .equalTo("hours", workday.getHours())
+                .equalTo("minutes", workday.getMinutes())
+                .findFirst();
+
+        workday1.removeFromRealm();
         realm.commitTransaction();
     }
 

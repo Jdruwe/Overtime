@@ -1,10 +1,7 @@
 package adevador.com.overtime.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,15 +11,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.IconTextView;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.joanzapata.android.iconify.Iconify;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -30,10 +23,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import adevador.com.overtime.R;
-import adevador.com.overtime.activity.MainActivity;
 import adevador.com.overtime.activity.SettingsActivity;
 import adevador.com.overtime.data.WorkdayUtil;
 import adevador.com.overtime.generator.IconGenerator;
@@ -47,7 +38,7 @@ public class CalendarFragment extends CaldroidFragment {
     private CaldroidFragment caldroidFragment;
     private Set<Date> multiSelection;
     private boolean inMultiSelection;
-    private Set<Date> workdays;
+    private Map<Date, Workday> workdays;
     private Calendar calendar;
 
     public static CalendarFragment newInstance() {
@@ -127,7 +118,8 @@ public class CalendarFragment extends CaldroidFragment {
                         mListener.dateSelected(date);
                     }
                 } else {
-                    mListener.workdayClicked(date);
+
+                    mListener.workdayClicked(workdays.get(date));
                 }
             }
 
@@ -137,7 +129,7 @@ public class CalendarFragment extends CaldroidFragment {
                     enableMultiSelection();
                     multiDateSelected(date);
                 } else {
-                    mListener.workdayClicked(date);
+                    mListener.workdayClicked(workdays.get(date));
                 }
             }
         };
@@ -146,9 +138,9 @@ public class CalendarFragment extends CaldroidFragment {
 
 
     private boolean checkIfWorkdayExists(Date date) {
-        return workdays != null && !workdays.isEmpty() && workdays.contains(date);
+        Workday workday = workdays.get(date);
+        return workday != null && workdays != null && !workdays.isEmpty();
     }
-
 
     private void multiDateSelected(Date date) {
         if (multiSelection.contains(date)) {
@@ -199,7 +191,7 @@ public class CalendarFragment extends CaldroidFragment {
         int hours = calendar.get(Calendar.HOUR);
         int minutes = calendar.get(Calendar.MINUTE);
 
-        workdays = new TreeSet<Date>();
+        workdays = new HashMap<>();
 
         Map<Date, Workday> extraData = new HashMap<Date, Workday>();
 
@@ -210,7 +202,7 @@ public class CalendarFragment extends CaldroidFragment {
             } else {
                 caldroidFragment.setBackgroundResourceForDate(R.color.green, workday.getDate());
             }
-            workdays.add(workday.getDate());
+            workdays.put(workday.getDate(), workday);
             extraData.put(workday.getDate(), workday);
         }
         sendDisplayData(extraData);

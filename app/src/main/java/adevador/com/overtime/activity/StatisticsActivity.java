@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.support.v4.app.DialogFragment;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -25,6 +27,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.joanzapata.android.iconify.Iconify;
 
+import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -109,25 +112,33 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         int minutesWorked = m + (h * 60);
         minutesWorked = minutesWorked - settingsMinutes;
 
+        String evaluation;
+
         if (minutesWorked > 0) {
+            evaluation = "Overtime: ";
             processedWorkDay.setOvertime(true);
+        } else if (minutesWorked < 0) {
+            evaluation = "Short time: ";
+            processedWorkDay.setOvertime(false);
         } else {
+            evaluation = "No overtime";
             processedWorkDay.setOvertime(false);
         }
 
-        minutesWorked = Math.abs(minutesWorked);
+        if (minutesWorked != 0) {
 
-        int hours = minutesWorked / 60;
-        int minutes = minutesWorked % 60;
+            minutesWorked = Math.abs(minutesWorked);
 
-        String evaluation = "";
+            int hours = minutesWorked / 60;
+            int minutes = minutesWorked % 60;
 
-        if (hours > 0) {
-            evaluation += hours + "h";
-        }
+            if (hours > 0) {
+                evaluation += hours + "h";
+            }
 
-        if (minutes > 0) {
-            evaluation += minutes + "m";
+            if (minutes > 0) {
+                evaluation += minutes + "m";
+            }
         }
 
         processedWorkDay.setTimeEvaluation(evaluation);
@@ -241,69 +252,10 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
                 openDatePickerDialog();
                 return true;
             case R.id.action_google_calendar_sync:
-                syncCalendar();
+                new GoogleCalendarSync().execute();
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void insertCalendarEvent(long calendarId, ProcessedWorkDay processedWorkDay) {
-
-        //Calendar beginTime = new GregorianCalendar(2014, 10, 29);
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(processedWorkDay.getDate());
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-
-        Calendar beginTime = new GregorianCalendar(year, month, day);
-        beginTime.setTimeZone(TimeZone.getTimeZone("UTC"));
-        beginTime.set(Calendar.HOUR, 0);
-        beginTime.set(Calendar.MINUTE, 0);
-        beginTime.set(Calendar.SECOND, 0);
-        beginTime.set(Calendar.MILLISECOND, 0);
-        long start = beginTime.getTimeInMillis();
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(CalendarContract.Events.CALENDAR_ID, calendarId);
-        contentValues.put(CalendarContract.Events.ALL_DAY, true);
-        contentValues.put(CalendarContract.Events.DTSTART, start);
-        contentValues.put(CalendarContract.Events.DTEND, start);
-        contentValues.put(CalendarContract.Events.EVENT_COLOR, Color.GREEN);
-
-        contentValues.put(CalendarContract.Events.TITLE, "Overtime: " + processedWorkDay.getTimeEvaluation());
-
-        TimeZone tz = TimeZone.getDefault();
-        contentValues.put(CalendarContract.Events.EVENT_TIMEZONE, tz.getID());
-
-        Uri uri = getContentResolver().insert(CalendarContract.Events.CONTENT_URI, contentValues);
-
-        long eventId = new Long(uri.getLastPathSegment());
-    }
-
-    private void syncCalendar() {
-        // Initialize Calendar service with valid OAuth credentials
-        String[] projection = new String[]{
-                CalendarContract.Calendars._ID,
-                CalendarContract.Calendars.NAME,
-                CalendarContract.Calendars.ACCOUNT_NAME,
-                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME
-        };
-
-        Cursor cursor = getContentResolver().query(
-                CalendarContract.Calendars.CONTENT_URI,
-                projection,
-                null,
-                null, CalendarContract.Calendars._ID + " ASC");
-
-        if (cursor.moveToFirst()) {
-            long calendarId = cursor.getLong(0);
-            //String displayName = cursor.getString(3);
-            for (ProcessedWorkDay processedWorkDay : processedWorkDayList) {
-                insertCalendarEvent(calendarId, processedWorkDay);
-            }
-        }
     }
 
     private void openDatePickerDialog() {
@@ -336,4 +288,80 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
     private RealmResults<Workday> getDataForPeriod(int year, int month) {
         return WorkdayUtil.getAll(this, year, month);
     }
+
+    private class GoogleCalendarSync extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            syncCalendar();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Toast.makeText(getApplicationContext(), "Calendar sync completed", Toast.LENGTH_SHORT).show();
+        }
+
+        private void insertCalendarEvent(long calendarId, ProcessedWorkDay processedWorkDay) {
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(processedWorkDay.getDate());
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH);
+            int day = cal.get(Calendar.DAY_OF_MONTH);
+
+            Calendar beginTime = new GregorianCalendar(year, month, day);
+            beginTime.setTimeZone(TimeZone.getTimeZone("UTC"));
+            beginTime.set(Calendar.HOUR, 0);
+            beginTime.set(Calendar.MINUTE, 0);
+            beginTime.set(Calendar.SECOND, 0);
+            beginTime.set(Calendar.MILLISECOND, 0);
+            long start = beginTime.getTimeInMillis();
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(CalendarContract.Events.CALENDAR_ID, calendarId);
+            contentValues.put(CalendarContract.Events.ALL_DAY, true);
+            contentValues.put(CalendarContract.Events.DTSTART, start);
+            contentValues.put(CalendarContract.Events.DTEND, start);
+            contentValues.put(CalendarContract.Events.EVENT_COLOR, Color.GREEN);
+
+            contentValues.put(CalendarContract.Events.TITLE, processedWorkDay.getTimeEvaluation());
+
+            TimeZone tz = TimeZone.getDefault();
+            contentValues.put(CalendarContract.Events.EVENT_TIMEZONE, tz.getID());
+
+            Uri uri = getContentResolver().insert(CalendarContract.Events.CONTENT_URI, contentValues);
+
+            long eventId = new Long(uri.getLastPathSegment());
+        }
+
+        private void syncCalendar() {
+            // Initialize Calendar service with valid OAuth credentials
+            String[] projection = new String[]{
+                    CalendarContract.Calendars._ID,
+                    CalendarContract.Calendars.NAME,
+                    CalendarContract.Calendars.ACCOUNT_NAME,
+                    CalendarContract.Calendars.CALENDAR_DISPLAY_NAME
+            };
+
+            Cursor cursor = getContentResolver().query(
+                    CalendarContract.Calendars.CONTENT_URI,
+                    projection,
+                    null,
+                    null, CalendarContract.Calendars._ID + " ASC");
+
+            if (cursor.moveToFirst()) {
+                long calendarId = cursor.getLong(0);
+                //String displayName = cursor.getString(3);
+                for (ProcessedWorkDay processedWorkDay : processedWorkDayList) {
+                    insertCalendarEvent(calendarId, processedWorkDay);
+                }
+            }
+        }
+
+    }
+
+
 }
+
+

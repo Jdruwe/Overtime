@@ -28,7 +28,7 @@ public class DeleteDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        final Date date = (Date) getArguments().getSerializable("date");
+        final Workday workday = (Workday) getArguments().getSerializable("workday");
 
         builder.setTitle(getString(R.string.delete_confirmation));
         builder.setMessage(R.string.delete_confirmation)
@@ -36,7 +36,7 @@ public class DeleteDialog extends DialogFragment {
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.deleteWorkday(date);
+                        mListener.deleteWorkday(workday);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
