@@ -1,6 +1,7 @@
 package adevador.com.overtime.activity;
 
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -80,6 +81,7 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         public void setTimeEvaluation(String timeEvaluation) {
             this.timeEvaluation = timeEvaluation;
         }
+
     }
 
     @Override
@@ -181,7 +183,9 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
             xVals.add(simpleDateFormat.format(workdays.get(i).getDate()));
             String value = workdays.get(i).getHours() + "." + workdays.get(i).getMinutes();
             yVals.add(new Entry(Float.parseFloat(value), i));
-            processedWorkDayList.add(generateProcessedWorkday(workdays.get(i).getDate(), workdays.get(i).getHours(), workdays.get(i).getMinutes(), dailyMinutes));
+
+            processedWorkDayList.add(generateProcessedWorkday(workdays.get(i).getDate(),
+                    workdays.get(i).getHours(), workdays.get(i).getMinutes(), dailyMinutes));
         }
 
         if (!workdays.isEmpty()) {
@@ -252,7 +256,7 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
                 openDatePickerDialog();
                 return true;
             case R.id.action_google_calendar_sync:
-                new GoogleCalendarSync().execute();
+                new GoogleCalendarSync(StatisticsActivity.this).execute();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -289,20 +293,46 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         return WorkdayUtil.getAll(this, year, month);
     }
 
-    private class GoogleCalendarSync extends AsyncTask<Void, Void, Void> {
+    private class GoogleCalendarSync extends AsyncTask<Void, Void, Boolean> {
 
-        @Override
-        protected Void doInBackground(Void... voids) {
-            syncCalendar();
-            return null;
+        private ProgressDialog dialog;
+
+        public GoogleCalendarSync(StatisticsActivity statisticsActivity) {
+            dialog = new ProgressDialog(statisticsActivity);
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            Toast.makeText(getApplicationContext(), "Calendar sync completed", Toast.LENGTH_SHORT).show();
+        protected void onPreExecute() {
+            dialog.setMessage("Syncing Google calendar");
+            dialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            return syncCalendar();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            if (result) {
+                Toast.makeText(getApplicationContext(), "Calendar sync completed", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(), "Calendar sync error", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        private void deleteCalendarEvent(long calendarId) {
+
         }
 
         private void insertCalendarEvent(long calendarId, ProcessedWorkDay processedWorkDay) {
+
+            deleteCalendarEvent(calendarId);
 
             Calendar cal = Calendar.getInstance();
             cal.setTime(processedWorkDay.getDate());
@@ -332,10 +362,10 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
 
             Uri uri = getContentResolver().insert(CalendarContract.Events.CONTENT_URI, contentValues);
 
-            long eventId = new Long(uri.getLastPathSegment());
+            long eventId = Long.valueOf(uri.getLastPathSegment());
         }
 
-        private void syncCalendar() {
+        private boolean syncCalendar() {
             // Initialize Calendar service with valid OAuth credentials
             String[] projection = new String[]{
                     CalendarContract.Calendars._ID,
@@ -356,12 +386,13 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
                 for (ProcessedWorkDay processedWorkDay : processedWorkDayList) {
                     insertCalendarEvent(calendarId, processedWorkDay);
                 }
+                return true;
+            } else {
+                return false;
             }
         }
 
     }
-
-
 }
 
 

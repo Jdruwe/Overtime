@@ -34,8 +34,9 @@ public class WorkdayUtil {
 
     public static RealmResults<Workday> getAll(Context context) {
         Realm realm = getRealm(context);
-        return realm.where(Workday.class)
+        RealmResults<Workday> workdays = realm.where(Workday.class)
                 .findAll();
+        return workdays;
     }
 
     public static RealmResults<Workday> getAll(Context context, int year, int month) {
@@ -76,8 +77,11 @@ public class WorkdayUtil {
                 .equalTo("minutes", workday.getMinutes())
                 .findFirst();
 
+        System.out.println("--------------------------------");
+        System.out.println(workday1.getHours());
+
         workday1.removeFromRealm();
-        realm.commitTransaction();
+        realm.cancelTransaction();
     }
 
     public static void deleteAll(Context context) {

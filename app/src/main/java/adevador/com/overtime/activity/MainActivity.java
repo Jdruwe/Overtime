@@ -74,8 +74,6 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
                     // Oh noes, there was a problem.
                     Toast.makeText(getApplicationContext(), "Problem setting up In-app Billing", Toast.LENGTH_SHORT).show();
                 }
-                // Hooray, IAB is fully set up!
-                Toast.makeText(getApplicationContext(), "Hooray, IAB is fully set up", Toast.LENGTH_SHORT).show();
             }
         });
     }
