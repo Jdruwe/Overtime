@@ -26,11 +26,11 @@ import java.util.Set;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.activity.SettingsActivity;
-import adevador.com.overtime.data.WorkdayUtil;
+import adevador.com.overtime.util.WorkdayHelper;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
 import adevador.com.overtime.model.Workday;
-import io.realm.RealmResults;
+import se.emilsjolander.sprinkles.CursorList;
 
 public class CalendarFragment extends CaldroidFragment {
 
@@ -195,7 +195,7 @@ public class CalendarFragment extends CaldroidFragment {
 
         Map<Date, Workday> extraData = new HashMap<Date, Workday>();
 
-        RealmResults<Workday> results = WorkdayUtil.getAll(getActivity());
+        CursorList<Workday> results = WorkdayHelper.getAll();
         for (Workday workday : results) {
             if (workday.getHours() > hours || (workday.getHours() == hours && workday.getMinutes() > minutes)) {
                 caldroidFragment.setBackgroundResourceForDate(R.color.orange, workday.getDate());

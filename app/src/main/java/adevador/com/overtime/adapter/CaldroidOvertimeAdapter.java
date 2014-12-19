@@ -3,7 +3,6 @@ package adevador.com.overtime.adapter;
 import adevador.com.overtime.R;
 import adevador.com.overtime.model.Workday;
 import hirondelle.date4j.DateTime;
-import io.realm.RealmResults;
 
 import java.sql.Time;
 import java.util.Calendar;

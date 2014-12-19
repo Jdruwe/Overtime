@@ -28,7 +28,6 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.joanzapata.android.iconify.Iconify;
 
-import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,11 +38,12 @@ import java.util.List;
 import java.util.TimeZone;
 
 import adevador.com.overtime.R;
-import adevador.com.overtime.data.WorkdayUtil;
+import adevador.com.overtime.util.GoogleCalendarHelper;
+import adevador.com.overtime.util.WorkdayHelper;
 import adevador.com.overtime.dialog.DateDialog;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.model.Workday;
-import io.realm.RealmResults;
+import se.emilsjolander.sprinkles.CursorList;
 
 public class StatisticsActivity extends ActionBarActivity implements DatePickerDialog.OnDateSetListener {
 
@@ -54,9 +54,19 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
     private List<ProcessedWorkDay> processedWorkDayList;
 
     class ProcessedWorkDay {
+        private long id;
         private Date date;
         private Boolean overtime;
         private String timeEvaluation;
+        private long googleCalendarEventId;
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
 
         public Date getDate() {
             return date;
@@ -82,6 +92,13 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
             this.timeEvaluation = timeEvaluation;
         }
 
+        public long getGoogleCalendarEventId() {
+            return googleCalendarEventId;
+        }
+
+        public void setGoogleCalendarEventId(long googleCalendarEventId) {
+            this.googleCalendarEventId = googleCalendarEventId;
+        }
     }
 
     @Override
@@ -107,9 +124,11 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
 
     }
 
-    private ProcessedWorkDay generateProcessedWorkday(Date date, int h, int m, int settingsMinutes) {
+    private ProcessedWorkDay generateProcessedWorkday(long id, Date date, int h, int m, int settingsMinutes, long googleCalendarEventId) {
         ProcessedWorkDay processedWorkDay = new ProcessedWorkDay();
         processedWorkDay.setDate(date);
+        processedWorkDay.setGoogleCalendarEventId(googleCalendarEventId);
+        processedWorkDay.setId(id);
 
         int minutesWorked = m + (h * 60);
         minutesWorked = minutesWorked - settingsMinutes;
@@ -153,7 +172,7 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         processedWorkDayList = new ArrayList<>();
 
         overtime.setVisibility(View.VISIBLE);
-        RealmResults<Workday> workdays = getDataForPeriod(year, month);
+        CursorList<Workday> workdays = getDataForPeriod(year, month);
 
         ArrayList<String> xVals = new ArrayList<String>();
         ArrayList<Entry> yVals = new ArrayList<Entry>();
@@ -184,11 +203,11 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
             String value = workdays.get(i).getHours() + "." + workdays.get(i).getMinutes();
             yVals.add(new Entry(Float.parseFloat(value), i));
 
-            processedWorkDayList.add(generateProcessedWorkday(workdays.get(i).getDate(),
-                    workdays.get(i).getHours(), workdays.get(i).getMinutes(), dailyMinutes));
+            processedWorkDayList.add(generateProcessedWorkday(workdays.get(i).getId(), workdays.get(i).getDate(),
+                    workdays.get(i).getHours(), workdays.get(i).getMinutes(), dailyMinutes, workdays.get(i).getGoogleCalendarEventId()));
         }
 
-        if (!workdays.isEmpty()) {
+        if (!workdays.asList().isEmpty()) {
             int hoursLeft = minutesWorked / 60;
             int minutesLeft = minutesWorked % 60;
             hoursWorked += hoursLeft;
@@ -222,6 +241,7 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         lineDataSet.setCircleColor(getResources().getColor(R.color.orange));
         lineDataSet.setCircleSize(7);
         lineDataSet.setColors(new int[]{R.color.orange}, this);
+
 
         String monthString = new DateFormatSymbols().getMonths()[month];
         chart.setDescription(monthString + "- " + year);
@@ -289,8 +309,8 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
         displayData(year, month);
     }
 
-    private RealmResults<Workday> getDataForPeriod(int year, int month) {
-        return WorkdayUtil.getAll(this, year, month);
+    private CursorList<Workday> getDataForPeriod(int year, int month) {
+        return WorkdayHelper.getAll(year, month);
     }
 
     private class GoogleCalendarSync extends AsyncTask<Void, Void, Boolean> {
@@ -326,13 +346,15 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
             }
         }
 
-        private void deleteCalendarEvent(long calendarId) {
-
+        private void deleteCalendarEvent(long eventId) {
+            GoogleCalendarHelper.deleteCalendarEvent(getContentResolver(), eventId);
         }
 
         private void insertCalendarEvent(long calendarId, ProcessedWorkDay processedWorkDay) {
 
-            deleteCalendarEvent(calendarId);
+            if (processedWorkDay.getGoogleCalendarEventId() != 0) {
+                deleteCalendarEvent(processedWorkDay.getGoogleCalendarEventId());
+            }
 
             Calendar cal = Calendar.getInstance();
             cal.setTime(processedWorkDay.getDate());
@@ -363,6 +385,8 @@ public class StatisticsActivity extends ActionBarActivity implements DatePickerD
             Uri uri = getContentResolver().insert(CalendarContract.Events.CONTENT_URI, contentValues);
 
             long eventId = Long.valueOf(uri.getLastPathSegment());
+            Workday workday = WorkdayHelper.get(processedWorkDay.getId());
+            WorkdayHelper.setGoogleCalendarEventId(workday, eventId);
         }
 
         private boolean syncCalendar() {
