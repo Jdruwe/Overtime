@@ -8,7 +8,6 @@ import adevador.com.overtime.model.Workday;
 /**
  * Created by druweje on 21/10/2014.
  */
-public interface TimeListener {
-    public void startSelected(int hour, int minute);
-    public void endSelected(int hour, int minute);
+public interface WorkdayListener {
+    public void deleteWorkday(Workday workday);
 }

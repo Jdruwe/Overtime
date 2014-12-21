@@ -6,15 +6,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TimePicker;
-
-import java.util.ArrayList;
-import java.util.Date;
 
 import adevador.com.overtime.R;
-import adevador.com.overtime.listener.TimeListener;
+import adevador.com.overtime.listener.WorkdayListener;
 import adevador.com.overtime.model.Workday;
 
 /**
@@ -22,7 +16,7 @@ import adevador.com.overtime.model.Workday;
  */
 public class DeleteDialog extends DialogFragment {
 
-    TimeListener mListener;
+    WorkdayListener mListener;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -53,7 +47,7 @@ public class DeleteDialog extends DialogFragment {
         // Verify that the host activity implements the callback interface
         try {
             // Instantiate the NoticeDialogListener so we can send events to the host
-            mListener = (TimeListener) activity;
+            mListener = (WorkdayListener) activity;
         } catch (ClassCastException e) {
             // The activity doesn't implement the interface, throw exception
             throw new ClassCastException(activity.toString() + " must implement TimeListener");

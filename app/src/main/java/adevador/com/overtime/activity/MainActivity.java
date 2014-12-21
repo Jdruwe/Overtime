@@ -1,7 +1,5 @@
 package adevador.com.overtime.activity;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
@@ -18,21 +16,20 @@ import java.util.Date;
 import java.util.Set;
 
 import adevador.com.overtime.R;
+import adevador.com.overtime.listener.WorkdayListener;
 import adevador.com.overtime.util.GoogleCalendarHelper;
 import adevador.com.overtime.util.WorkdayHelper;
 import adevador.com.overtime.dialog.DeleteDialog;
-import adevador.com.overtime.dialog.WorkDialog;
 import adevador.com.overtime.fragment.CalendarFragment;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.CalendarListener;
-import adevador.com.overtime.listener.TimeListener;
 import adevador.com.overtime.model.Workday;
 import adevador.com.overtime.util.IabHelper;
 import adevador.com.overtime.util.IabResult;
 import adevador.com.overtime.util.Inventory;
 import adevador.com.overtime.util.Purchase;
 
-public class MainActivity extends ActionBarActivity implements CalendarListener, TimeListener {
+public class MainActivity extends ActionBarActivity implements CalendarListener, WorkdayListener {
 
     private final String SKU_DONATION = "overtime_donation";
 
@@ -190,12 +187,15 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
         openDeleteDialog(workday);
     }
 
-    private void openTimeDialog(ArrayList<Date> date) {
-        DialogFragment workDialog = new WorkDialog();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("dates", date);
-        workDialog.setArguments(bundle);
-        workDialog.show(getSupportFragmentManager(), "hours");
+    private void openTimeDialog(ArrayList<Date> dates) {
+//        DialogFragment workDialog = new WorkDialog();
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("dates", date);
+//        workDialog.setArguments(bundle);
+//        workDialog.show(getSupportFragmentManager(), "overview");
+        Intent intent = new Intent(this, WorkdayActivity.class);
+        intent.putExtra("dates", dates);
+        startActivity(intent);
     }
 
     private void openDeleteDialog(Workday workday) {
@@ -204,13 +204,6 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
         bundle.putSerializable("workday", workday);
         deleteDialog.setArguments(bundle);
         deleteDialog.show(getSupportFragmentManager(), "delete");
-    }
-
-
-    @Override
-    public void timeWorked(ArrayList<Date> dates, int hours, int minutes) {
-        WorkdayHelper.save(dates, hours, minutes);
-        refreshCalendar(null);
     }
 
     @Override

@@ -10,22 +10,20 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import adevador.com.overtime.R;
 import adevador.com.overtime.activity.SettingsActivity;
 import adevador.com.overtime.listener.TimeListener;
+import adevador.com.overtime.listener.WorkdayListener;
 
 /**
  * Created by druweje on 21/10/2014.
  */
-public class WorkDialog extends DialogFragment {
+public class TimeDialog extends DialogFragment {
 
     TimeListener mListener;
     private TimePicker timePicker;
@@ -37,7 +35,7 @@ public class WorkDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_time, null);
 
-        timePicker = (TimePicker) view.findViewById(R.id.time_picker);
+        timePicker = (TimePicker) view.findViewById(R.id.time_picker_start);
         timePicker.setIs24HourView(true);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -47,25 +45,30 @@ public class WorkDialog extends DialogFragment {
         calendar.setTimeInMillis(milliseconds);
 
         int hours = calendar.get(Calendar.HOUR);
-        int minutes = calendar.get(Calendar.MINUTE);
+        final int minutes = calendar.get(Calendar.MINUTE);
 
         timePicker.setCurrentHour(hours);
         timePicker.setCurrentMinute(minutes);
 
-        final ArrayList<Date> dates = (ArrayList<Date>) getArguments().getSerializable("dates");
+        final String title = getArguments().getString("title");
 
-        builder.setTitle(getString(R.string.hours_worked));
+        builder.setTitle(title);
         builder.setView(view)
                 // Add action buttons
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.timeWorked(dates, timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                        if (title.equals("Start")) {
+                            String d = timePicker.toString();
+                            mListener.startSelected(timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                        } else if (title.equals("End")) {
+                            mListener.endSelected(timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                        }
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        WorkDialog.this.dismiss();
+                        TimeDialog.this.dismiss();
                     }
                 });
         return builder.create();

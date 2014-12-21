@@ -3,7 +3,6 @@
 
     <string name="app_name">Overtime</string>
     <string name="hello_world">Hello world!</string>
-
     <string name="hours_worked">Hours worked</string>
     <string name="delete_information">Delete information</string>
 
@@ -15,7 +14,6 @@
     <string name="action_date">Date</string>
     <string name="action_export">Export</string>
     <string name="action_import">Import</string>
-
     <string name="no_data_found">No data found for this month</string>
     <string name="about">About</string>
 
@@ -28,6 +26,8 @@
     <string name="title_activity_statistics">StatisticsActivity</string>
     <string name="about_text">App by Adevador (Jeroen Druwé and Dimitri De Kerf), using:\n\n - MPAndroidChart \n - Android-iconify \n - Caldroid \n - Sprinkles \n - App icon by Freepik, CC BY 3.0</string>
     <string name="action_donate">Donate</string>
-
+    <string name="add_timing">Add timing</string>
+    <string name="overview">Overview</string>
+    <string name="title_activity_workday">WorkdayActivity</string>
 
 </resources>
