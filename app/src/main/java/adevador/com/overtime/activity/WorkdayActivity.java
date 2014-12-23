@@ -2,8 +2,10 @@ package adevador.com.overtime.activity;
 
 import android.content.Intent;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -26,14 +28,16 @@ import adevador.com.overtime.R;
 import adevador.com.overtime.dialog.TimeDialog;
 import adevador.com.overtime.generator.IconGenerator;
 import adevador.com.overtime.listener.TimeListener;
+import adevador.com.overtime.util.WorkdayHelper;
 
 public class WorkdayActivity extends ActionBarActivity implements TimeListener {
 
     private Button addTimings;
     private ListView timingsList;
     private TextView infoLabel;
-    ArrayAdapter<String> adapter;
-    ArrayList<String> listItems;
+    private ArrayAdapter<String> adapter;
+    private ArrayList<String> listItems;
+    private ArrayList<Date> dates;
 
     private class Timing {
 
@@ -146,7 +150,7 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workday);
-
+        showUpNavigation();
         finalTimings = new ArrayList<>();
 
         infoLabel = (TextView) findViewById(R.id.info_label);
@@ -185,24 +189,15 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
         }
 
         Intent intent = getIntent();
-        final ArrayList<Date> dates = (ArrayList<Date>) intent.getSerializableExtra("dates");
+        dates = (ArrayList<Date>) intent.getSerializableExtra("dates");
 
         setListeners();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    private void showUpNavigation() {
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void setListeners() {
@@ -270,5 +265,46 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putSerializable("finalTimings", (ArrayList) finalTimings);
         savedInstanceState.putSerializable("listItems", (ArrayList) listItems);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.workday, menu);
+        menu.findItem(R.id.action_save).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_check, R.color.dark_gray, 24, this));
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.action_save:
+                saveTimings();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void saveTimings() {
+        if (finalTimings.size() > 0) {
+
+            int totalHours = 0;
+            int totalMinutes = 0;
+
+            for (Map<String, Integer> timing : finalTimings) {
+                totalHours += timing.get("hour");
+                totalMinutes += timing.get("minute");
+            }
+
+            WorkdayHelper.save(dates, totalHours, totalMinutes);
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+
+        } else {
+            Toast.makeText(this, "No timings found", Toast.LENGTH_LONG).show();
+        }
     }
 }

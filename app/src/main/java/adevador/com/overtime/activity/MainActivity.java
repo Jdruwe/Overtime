@@ -188,11 +188,6 @@ public class MainActivity extends ActionBarActivity implements CalendarListener,
     }
 
     private void openTimeDialog(ArrayList<Date> dates) {
-//        DialogFragment workDialog = new WorkDialog();
-//        Bundle bundle = new Bundle();
-//        bundle.putSerializable("dates", date);
-//        workDialog.setArguments(bundle);
-//        workDialog.show(getSupportFragmentManager(), "overview");
         Intent intent = new Intent(this, WorkdayActivity.class);
         intent.putExtra("dates", dates);
         startActivity(intent);
