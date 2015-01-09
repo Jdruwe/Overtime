@@ -102,10 +102,16 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
 
             Map<String, Integer> result = new HashMap<>();
 
-            //End time is later than the start time
-            if ((getStartHour() < getEndHour()) || ((getStartHour() == getEndHour()) && (getStartMinute() < getEndMinute()))) {
+            //End time is later than the start time (incl. minutes)
+            if ((getStartHour() < getEndHour() && getStartMinute() < getEndMinute()) || ((getStartHour() == getEndHour()) && (getStartMinute() < getEndMinute()))) {
                 result.put("hour", getEndHour() - getStartHour());
                 result.put("minute", getEndMinute() - getStartMinute());
+            }
+
+            //End time is later than the start time (excl. minutes)
+            if ((getStartHour() < getEndHour() && getStartMinute() > getEndMinute())) {
+                result.put("hour", (getEndHour() - getStartHour()) - 1);
+                result.put("minute", 60 - (getStartMinute() - getEndMinute()));
             }
 
             //User entered same time for both
