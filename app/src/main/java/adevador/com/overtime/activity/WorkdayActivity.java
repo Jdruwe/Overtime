@@ -102,47 +102,65 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
 
             Map<String, Integer> result = new HashMap<>();
 
-            //End time is later than the start time (incl. minutes)
-            if ((getStartHour() < getEndHour() && getStartMinute() < getEndMinute()) || ((getStartHour() == getEndHour()) && (getStartMinute() < getEndMinute()))) {
+            //Start End Result
+            //8:00 17:00 9:00
+            if ((getStartHour() < getEndHour()) && (getStartMinute() == getEndMinute())) {
+                result.put("hour", getEndHour() - getStartHour());
+                result.put("minute", 0);
+            }
+
+            //8:00 17:30 9:30
+            if ((getStartHour() < getEndHour()) && (getStartMinute() < getEndMinute())) {
                 result.put("hour", getEndHour() - getStartHour());
                 result.put("minute", getEndMinute() - getStartMinute());
             }
 
-            //End time is later than the start time (excl. minutes)
-            if ((getStartHour() < getEndHour() && getStartMinute() > getEndMinute())) {
+            //8:30 17:20 8:50
+            if ((getStartHour() < getEndHour()) && (getStartMinute() > getEndMinute())) {
                 result.put("hour", (getEndHour() - getStartHour()) - 1);
                 result.put("minute", 60 - (getStartMinute() - getEndMinute()));
             }
 
-            //User entered same time for both
+            //8:30 8:40 0:10
+            if ((getStartHour() == getEndHour()) && (getStartMinute() < getEndMinute())) {
+                result.put("hour", 0);
+                result.put("minute", getEndMinute() - getStartMinute());
+            }
+
+            //17:00	8:00 15:00
+            if ((getStartHour() > getEndHour()) && (getStartMinute() == getEndMinute())) {
+                result.put("hour", (24 - getStartHour()) + getEndHour());
+                result.put("minute", 0);
+            }
+
+            //17:30	8:00 14:30
+            if ((getStartHour() > getEndHour()) && (getStartMinute() > getEndMinute())) {
+                result.put("hour", ((24 - getStartHour()) + getEndHour()) - 1);
+                result.put("minute", getStartMinute() - getEndMinute());
+            }
+
+            //17:20	8:30 15:10
+            if ((getStartHour() > getEndHour()) && (getStartMinute() < getEndMinute())) {
+                result.put("hour", (24 - getStartHour()) + getEndHour());
+                result.put("minute", getEndMinute() - getStartMinute());
+            }
+
+            //17:00	17:00 24:00
             if ((getStartHour() == getEndHour()) && (getStartMinute() == getEndMinute())) {
                 result.put("hour", 24);
                 result.put("minute", 0);
             }
 
-            //End time is earlier than the start time ==> end time is on the next day
-            if ((getStartHour() > getEndHour() || ((getStartHour() == getEndHour()) && (getStartMinute() > getEndMinute())))) {
+            //17:20	8:20 15:00
+            if ((getStartHour() > getEndHour()) && (getStartMinute() == getEndMinute())) {
+                result.put("hour", (24 - getStartHour()) + getEndHour());
+                result.put("minute", 0);
+            }
 
-                if ((getStartHour() > getEndHour() && (getStartMinute() == getEndMinute()))) {
-                    result.put("hour", 24 - getStartHour() + getEndHour());
-                    result.put("minute", 0);
-                }
-
-                if ((getStartHour() == getEndHour() && (getStartMinute() > getEndMinute()))) {
-                    result.put("hour", 23);
-                    result.put("minute", 60 - (getStartMinute() - getEndMinute()));
-                }
-
-                if ((getStartHour() > getEndHour() && (getStartMinute() < getEndMinute()))) {
-                    result.put("hour", 24 - (getStartHour() - getEndHour()));
-                    result.put("minute", getEndMinute() - getStartMinute());
-                }
-
-                if ((getStartHour() > getEndHour() && (getStartMinute() > getEndMinute()))) {
-                    result.put("hour", 23 - (getStartHour() - getEndHour()));
-                    result.put("minute", 60 - (getStartMinute() - getEndMinute()));
-                }
-
+            //17:20	17:10 23:50
+            if ((getStartHour() == getEndHour()) && (getStartMinute() > getEndMinute())) {
+                result.put("hour", 23);
+                result.put("minute", 60 - (getStartMinute() - getEndMinute()));
             }
 
             return result;

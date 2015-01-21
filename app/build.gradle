@@ -8,8 +8,8 @@ android {
         applicationId "adevador.com.overtime"
         minSdkVersion 14
         targetSdkVersion 20
-        versionCode 8
-        versionName "1.2.1"
+        versionCode 9
+        versionName "1.2.2"
     }
 
     signingConfigs {
@@ -24,7 +24,8 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'        }
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
     }
 
     compileOptions {
