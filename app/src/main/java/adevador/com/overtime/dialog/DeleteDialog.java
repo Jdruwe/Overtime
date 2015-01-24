@@ -24,7 +24,7 @@ public class DeleteDialog extends DialogFragment {
 
         final Workday workday = (Workday) getArguments().getSerializable("workday");
 
-        builder.setTitle(getString(R.string.delete_confirmation));
+        builder.setTitle(getString(R.string.delete_title));
         builder.setMessage(R.string.delete_confirmation)
                 // Add action buttons
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
