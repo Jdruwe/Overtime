@@ -1,10 +1,18 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="YOUR INFORMATION">
+
+        <!--Default 8 hours/day-->
         <adevador.com.overtime.preference.TimePreference
             android:defaultValue="25200000"
             android:key="hours_day_key"
             android:title="Hours/day" />
+
+        <!--Default 1 hour/day-->
+        <adevador.com.overtime.preference.TimePreference
+            android:defaultValue="0"
+            android:key="lunch_time_key"
+            android:title="Lunch time/day" />
 
     </PreferenceCategory>
 

@@ -6,6 +6,12 @@
         android:id="@+id/action_save"
         android:orderInCategory="3"
         android:title="@string/action_save"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_lunch"
+        android:orderInCategory="2"
+        android:title="@string/action_lunch"
+        app:showAsAction="ifRoom" />
 
 </menu>

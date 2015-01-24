@@ -1,6 +1,8 @@
 package adevador.com.overtime.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -294,8 +298,44 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.workday, menu);
+        menu.findItem(R.id.action_lunch).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_coffee, R.color.dark_gray, 24, this));
         menu.findItem(R.id.action_save).setIcon(IconGenerator.getIcon(Iconify.IconValue.fa_check, R.color.dark_gray, 24, this));
         return true;
+    }
+
+    private void subtractLunchTime() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        Long milliseconds = sharedPref.getLong(SettingsActivity.KEY_PREF_LUNCH_TIME, 0);
+
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(milliseconds);
+
+        Date date = calendar.getTime();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+        listItems.add("- " + simpleDateFormat.format(date));
+
+        Map<String, Integer> result = new HashMap<>();
+
+        //Make both number negative
+        result.put("hour", 0 - calendar.get(Calendar.HOUR_OF_DAY));
+        result.put("minute", 0 - calendar.get(Calendar.MINUTE));
+
+        finalTimings.add(result);
+
+        int totalHours = 0;
+        int totalMinutes = 0;
+
+        for (Map<String, Integer> timing : finalTimings) {
+            totalHours += timing.get("hour");
+            totalMinutes += timing.get("minute");
+        }
+
+        timingsList.setVisibility(View.VISIBLE);
+        infoLabel.setText("Worked: " + totalHours + "h " + totalMinutes + "m");
+        infoLabel.setVisibility(View.VISIBLE);
+        adapter.notifyDataSetChanged();
+
+        Toast.makeText(getApplicationContext(), "Subtrated lunch time", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -307,6 +347,9 @@ public class WorkdayActivity extends ActionBarActivity implements TimeListener {
                 return true;
             case R.id.action_save:
                 saveTimings();
+                return true;
+            case R.id.action_lunch:
+                subtractLunchTime();
                 return true;
         }
         return super.onOptionsItemSelected(item);

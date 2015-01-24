@@ -13,6 +13,7 @@
     <string name="action_multi">Multi</string>
     <string name="action_date">Date</string>
     <string name="action_save">Save</string>
+    <string name="action_lunch">Lunch</string>
     <string name="action_export">Export</string>
     <string name="action_import">Import</string>
     <string name="no_data_found">No data found for this month</string>
